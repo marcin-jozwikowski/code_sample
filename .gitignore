@@ -8,3 +8,4 @@ docker-compose.yml
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+.idea/
