@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -15,6 +16,7 @@ class Product
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"index"})
      */
     private ?int $id;
 
@@ -22,6 +24,7 @@ class Product
      * @ORM\Column(type="string", length=64)
      *
      * @Assert\Length(min="3", max="64")
+     * @Groups({"index"})
      */
     private ?string $name;
 
@@ -29,6 +32,7 @@ class Product
      * @ORM\Column(type="integer")
      *
      * @Assert\GreaterThan(0)
+     * @Groups({"index"})
      */
     private ?int $quantity;
 
