@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -15,17 +16,21 @@ class Product
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=64)
+     *
+     * @Assert\Length(min="3", max="64")
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\Column(type="integer")
+     *
+     * @Assert\GreaterThan(0)
      */
-    private $quantity;
+    private ?int $quantity;
 
     public function getId(): ?int
     {
