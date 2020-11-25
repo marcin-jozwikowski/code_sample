@@ -6,7 +6,7 @@ namespace App\Service;
 
 interface ApiSerializerInterface
 {
-    public function toJson($data, array $fields = []): string;
+    public function toJson($data, array $groups = []): string;
 
     public function jsonToObject(string $json, object $object): object;
 }

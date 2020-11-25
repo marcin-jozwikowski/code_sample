@@ -16,7 +16,7 @@ class Product
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"index"})
+     * @Groups({"all", "index"})
      */
     private ?int $id;
 
@@ -24,7 +24,7 @@ class Product
      * @ORM\Column(type="string", length=64)
      *
      * @Assert\Length(min="3", max="64")
-     * @Groups({"index"})
+     * @Groups({"all", "index", "get", "post"})
      */
     private ?string $name;
 
@@ -32,7 +32,7 @@ class Product
      * @ORM\Column(type="integer")
      *
      * @Assert\GreaterThan(0)
-     * @Groups({"index"})
+     * @Groups({"all", "get", "post"})
      */
     private ?int $quantity;
 
