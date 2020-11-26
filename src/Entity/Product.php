@@ -24,7 +24,8 @@ class Product
      * @ORM\Column(type="string", length=64)
      *
      * @Assert\Length(min="3", max="64")
-     * @Groups({"all", "index", "get", "post"})
+     * @Assert\NotBlank()
+     * @Groups({"all", "index", "get", "update"})
      */
     private ?string $name;
 
@@ -32,7 +33,8 @@ class Product
      * @ORM\Column(type="integer")
      *
      * @Assert\GreaterThan(0)
-     * @Groups({"all", "get", "post"})
+     * @Assert\NotBlank()
+     * @Groups({"all", "get", "update"})
      */
     private ?int $quantity;
 

@@ -95,4 +95,84 @@ class ProductsController extends AbstractApiController
     {
         return parent::postAction($request, $apiValidator);
     }
+
+    /**
+     * @Route(path="/{id}", name="product_patch", methods={"PATCH"}, requirements={"id"="\d+"})
+     * @OA\Patch (
+     *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
+     *          @OA\Schema(type="integer"),
+     *     ),
+     * )
+     * @OA\RequestBody(
+     *     @OA\JsonContent(ref=@Nelmio\Model(type=Product::class, groups={"post"}))
+     * ),
+     * @OA\Response(
+     *     response=200,
+     *     description="Product updated",
+     *     @OA\JsonContent(ref=@Nelmio\Model(type=Product::class, groups={"update"}))
+     * ),
+     * @OA\Response(response="400", description="Invalid data structure"),
+     * @OA\Response(response="404", description="Product not found"),
+     * @OA\Response(response="417", description="Validation failed",
+     *      @OA\JsonContent(
+     *          type="object",
+     *          @OA\Property(property="field_name", type="array",
+     *              @OA\Items(type="string", default="Error content"),
+     *          ),
+     *     )
+     * ),
+     */
+    public function patchAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    {
+        return parent::patchAction($id, $request, $apiValidator);
+    }
+
+    /**
+     * @Route(path="/{id}", name="product_put", methods={"PUT"}, requirements={"id"="\d+"})
+     * @OA\Put (
+     *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
+     *          @OA\Schema(type="integer"),
+     *     ),
+     * )
+     * @OA\RequestBody(
+     *     @OA\JsonContent(ref=@Nelmio\Model(type=Product::class, groups={"post"}))
+     * ),
+     * @OA\Response(
+     *     response=200,
+     *     description="Product updated",
+     *     @OA\JsonContent(ref=@Nelmio\Model(type=Product::class, groups={"update"}))
+     * ),
+     * @OA\Response(response="400", description="Invalid data structure"),
+     * @OA\Response(response="404", description="Product not found"),
+     * @OA\Response(response="417", description="Validation failed",
+     *      @OA\JsonContent(
+     *          type="object",
+     *          @OA\Property(property="field_name", type="array",
+     *              @OA\Items(type="string", default="Error content"),
+     *          ),
+     *     )
+     * ),
+     */
+    public function putAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    {
+        return parent::putAction($id, $request, $apiValidator);
+    }
+
+    /**
+     * @Route(path="/{id}", name="product_delete", methods={"DELETE"}, requirements={"id"="\d+"})
+     * @OA\Delete (
+     *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
+     *          @OA\Schema(type="integer"),
+     *     ),
+     * )
+     * @OA\Response(
+     *     response=200,
+     *     description="Product delete")
+     * ),
+     * @OA\Response(response="404", description="Product not found"),
+     */
+    public function deleteAction(int $id): JsonResponse
+    {
+        return parent::deleteAction($id);
+    }
 }

@@ -6,9 +6,9 @@ use App\Message\FetchEntityMessage;
 use App\Message\FetchPaginatedEntitiesInterface;
 use App\Message\FetchPaginatedEntitiesMessage;
 use App\Message\PersistEntityMessage;
+use App\Message\RemoveEntityMessage;
 use App\Service\ApiSerializerInterface;
 use App\Service\ApiValidatorInterface;
-use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,27 +54,78 @@ abstract class AbstractApiController extends AbstractController
 
     public function postAction(Request $request, ApiValidatorInterface $apiValidator): JsonResponse
     {
-        $entity = new $this->getApiEntityClassName();
-        try {
-            $this->serializer->jsonToObject($request->getContent(), $entity);
-        } catch (\Exception $e) {
-            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
-        }
+        $className = $this->getApiEntityClassName();
+        $entity    = new $className();
 
-        try {
-            $validationErrors = $apiValidator->validateObject($entity);
-        } catch (\Exception $e) {
-            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
-        }
+        $errorResponse = $this->fillEntityWithRequestData($entity, $request, $apiValidator);
 
-        if ($validationErrors->count() > 0) {
-            return new JsonResponse($apiValidator->errorsListToMessageArray($validationErrors), Response::HTTP_EXPECTATION_FAILED);
+        if ($errorResponse instanceof JsonResponse) {
+            return $errorResponse;
         }
 
         $event = new PersistEntityMessage($entity);
         $this->messageBus->dispatch($event);
 
         return new JsonResponse($this->serializer->toJson($entity, ['all']), Response::HTTP_CREATED, [], true);
+    }
+
+    public function putAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    {
+        try {
+            $entity = $this->getEntity($id);
+        } catch (NotFoundHttpException $exception) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $className        = $this->getApiEntityClassName();
+        $empty            = new $className();
+        $emptyObjectError = $this->fillEntityWithRequestData($empty, $request, $apiValidator);
+        if ($emptyObjectError instanceof JsonResponse) {
+            return $emptyObjectError;
+        }
+
+        $errorResponse = $this->fillEntityWithRequestData($entity, $request, $apiValidator);
+        if ($errorResponse instanceof JsonResponse) {
+            return $errorResponse;
+        }
+
+        $event = new PersistEntityMessage($entity);
+        $this->messageBus->dispatch($event);
+
+        return new JsonResponse($this->serializer->toJson($entity, ['update']), Response::HTTP_OK, [], true);
+    }
+
+    public function patchAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    {
+        try {
+            $entity = $this->getEntity($id);
+        } catch (NotFoundHttpException $exception) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+        $errorResponse = $this->fillEntityWithRequestData($entity, $request, $apiValidator);
+
+        if ($errorResponse instanceof JsonResponse) {
+            return $errorResponse;
+        }
+
+        $event = new PersistEntityMessage($entity);
+        $this->messageBus->dispatch($event);
+
+        return new JsonResponse($this->serializer->toJson($entity, ['update']), Response::HTTP_OK, [], true);
+    }
+
+    public function deleteAction(int $id): JsonResponse
+    {
+        try {
+            $entity = $this->getEntity($id);
+        } catch (NotFoundHttpException $exception) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+
+        $event = new RemoveEntityMessage($entity);
+        $this->messageBus->dispatch($event);
+
+        return new JsonResponse(null, Response::HTTP_OK);
     }
 
     protected function paginatedResult(FetchPaginatedEntitiesInterface $fetchPaginated, iterable $items, $groups = ['index']): string
@@ -97,5 +148,26 @@ abstract class AbstractApiController extends AbstractController
         }
 
         return $message->getEntity();
+    }
+
+    protected function fillEntityWithRequestData(object $entity, Request $request, ApiValidatorInterface $apiValidator): ?JsonResponse
+    {
+        try {
+            $this->serializer->jsonToObject($request->getContent(), $entity);
+        } catch (\Exception $e) {
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $validationErrors = $apiValidator->validateObject($entity);
+        } catch (\Exception $e) {
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($validationErrors->count() > 0) {
+            return new JsonResponse($apiValidator->errorsListToMessageArray($validationErrors), Response::HTTP_EXPECTATION_FAILED);
+        }
+
+        return null;
     }
 }
