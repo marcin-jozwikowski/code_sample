@@ -2,8 +2,8 @@
 
 namespace App\Tests\unit\MessageHandler;
 
-use App\Message\FetchPaginatedEntitiesMessage;
-use App\MessageHandler\FetchPaginatedEntitiesMessageHandler;
+use App\Message\FetchPaginatedEntitiesQuery;
+use App\MessageHandler\FetchPaginatedEntitiesQueryHandler;
 use App\Service\ApiPaginatorInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Knp\Component\Pager\Pagination\PaginationInterface;
@@ -27,6 +27,12 @@ class FetchPaginatedEntitiesMessageHandlerTest extends TestCase
         $paginated->expects(self::once())
             ->method('getTotalItemCount')
             ->willReturn(self::TOTAL);
+        $paginated->expects(self::once())
+            ->method('getCurrentPageNumber')
+            ->willReturn(self::PAGE);
+        $paginated->expects(self::once())
+            ->method('getItemNumberPerPage')
+            ->willReturn(self::PER_PAGE);
 
         $paginator = $this->createMock(ApiPaginatorInterface::class);
         $paginator->expects(self::once())
@@ -38,15 +44,14 @@ class FetchPaginatedEntitiesMessageHandlerTest extends TestCase
             )
             ->willReturn($paginated);
 
-        $event = new FetchPaginatedEntitiesMessage(self::PAGE, self::PER_PAGE, self::CLASSNAME);
+        $event = new FetchPaginatedEntitiesQuery(self::PAGE, self::PER_PAGE, self::CLASSNAME);
 
-        $handler = new FetchPaginatedEntitiesMessageHandler($paginator);
-        $handler->__invoke($event);
+        $handler = new FetchPaginatedEntitiesQueryHandler($paginator);
+        $result  = $handler->__invoke($event);
 
-        self::assertEquals(self::PAGE, $event->getPage());
-        self::assertEquals(self::PER_PAGE, $event->getPerPage());
-        self::assertEquals(self::CLASSNAME, $event->getClassName());
-        self::assertEquals(self::TOTAL, $event->getTotal());
-        self::assertEquals($items, $event->getResults());
+        self::assertEquals(self::PAGE, $result->getCurrentPageNumber());
+        self::assertEquals(self::PER_PAGE, $result->getItemNumberPerPage());
+        self::assertEquals(self::TOTAL, $result->getTotalItemCount());
+        self::assertEquals($items, $result->getItems());
     }
 }

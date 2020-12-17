@@ -4,11 +4,11 @@
 namespace App\MessageHandler;
 
 
-use App\Message\FetchEntityMessageInterface;
+use App\Message\FetchEntityQueryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class FetchEntityMessageHandler implements MessageHandlerInterface
+class FetchEntityQueryHandler implements MessageHandlerInterface
 {
     private EntityManagerInterface $entityManager;
 
@@ -17,10 +17,9 @@ class FetchEntityMessageHandler implements MessageHandlerInterface
         $this->entityManager = $entityManager;
     }
 
-    public function __invoke(FetchEntityMessageInterface $fetchEntityMessage)
+    public function __invoke(FetchEntityQueryInterface $fetchEntityMessage): object
     {
         $repository = $this->entityManager->getRepository($fetchEntityMessage->getClassname());
-        $entity     = $repository->find($fetchEntityMessage->getId());
-        $fetchEntityMessage->setEntity($entity);
+        return $repository->find($fetchEntityMessage->getId());
     }
 }

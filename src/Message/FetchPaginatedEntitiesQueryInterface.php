@@ -4,7 +4,7 @@
 namespace App\Message;
 
 
-interface FetchPaginatedEntitiesInterface
+interface FetchPaginatedEntitiesQueryInterface
 {
     public function getPage(): int;
 

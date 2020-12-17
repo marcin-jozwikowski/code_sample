@@ -4,10 +4,9 @@
 namespace App\Message;
 
 
-class FetchEntityMessage implements FetchEntityMessageInterface
+class FetchEntityQuery implements FetchEntityQueryInterface
 {
     protected int     $id;
-    protected ?object $entity = null;
     protected string  $className;
 
     public function __construct(int $id, string $className)
@@ -24,15 +23,5 @@ class FetchEntityMessage implements FetchEntityMessageInterface
     public function getClassname(): string
     {
         return $this->className;
-    }
-
-    public function setEntity(?object $entity): void
-    {
-        $this->entity = $entity;
-    }
-
-    public function getEntity(): ?object
-    {
-        return $this->entity;
     }
 }

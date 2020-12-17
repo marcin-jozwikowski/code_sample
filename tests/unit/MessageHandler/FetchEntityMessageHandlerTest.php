@@ -2,8 +2,8 @@
 
 namespace App\Tests\unit\MessageHandler;
 
-use App\Message\FetchEntityMessage;
-use App\MessageHandler\FetchEntityMessageHandler;
+use App\Message\FetchEntityQuery;
+use App\MessageHandler\FetchEntityQueryHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +17,7 @@ class FetchEntityMessageHandlerTest extends TestCase
     public function test__invoke(): void
     {
         $entity = new stdClass();
-        $event  = new FetchEntityMessage(self::ENTITY_ID, self::CLASSNAME);
+        $event  = new FetchEntityQuery(self::ENTITY_ID, self::CLASSNAME);
 
         $repo = $this->createMock(EntityRepository::class);
         $repo->expects(self::once())
@@ -31,11 +31,11 @@ class FetchEntityMessageHandlerTest extends TestCase
             ->with(self::equalTo(self::CLASSNAME))
             ->willReturn($repo);
 
-        $tested = new FetchEntityMessageHandler($entityManager);
-        $tested->__invoke($event);
+        $tested = new FetchEntityQueryHandler($entityManager);
+        $result = $tested->__invoke($event);
 
         self::assertEquals(self::ENTITY_ID, $event->getId());
         self::assertEquals(self::CLASSNAME, $event->getClassname());
-        self::assertEquals($entity, $event->getEntity());
+        self::assertEquals($entity, $result);
     }
 }

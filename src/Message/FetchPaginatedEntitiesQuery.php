@@ -4,7 +4,7 @@
 namespace App\Message;
 
 
-class FetchPaginatedEntitiesMessage implements FetchPaginatedEntitiesInterface
+class FetchPaginatedEntitiesQuery implements FetchPaginatedEntitiesQueryInterface
 {
     protected int       $page;
     protected int       $perPage;

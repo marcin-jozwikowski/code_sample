@@ -4,11 +4,12 @@
 namespace App\MessageHandler;
 
 
-use App\Message\FetchPaginatedEntitiesInterface;
+use App\Message\FetchPaginatedEntitiesQueryInterface;
 use App\Service\ApiPaginatorInterface;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class FetchPaginatedEntitiesMessageHandler implements MessageHandlerInterface
+class FetchPaginatedEntitiesQueryHandler implements MessageHandlerInterface
 {
     private ApiPaginatorInterface $paginator;
 
@@ -17,15 +18,12 @@ class FetchPaginatedEntitiesMessageHandler implements MessageHandlerInterface
         $this->paginator = $paginator;
     }
 
-    public function __invoke(FetchPaginatedEntitiesInterface $fetchPaginatedEntities)
+    public function __invoke(FetchPaginatedEntitiesQueryInterface $fetchPaginatedEntities): PaginationInterface
     {
-        $paginated = $this->paginator->getPaginated(
+        return $this->paginator->getPaginated(
             $fetchPaginatedEntities->getPage(),
             $fetchPaginatedEntities->getPerPage(),
             $fetchPaginatedEntities->getClassName()
         );
-
-        $fetchPaginatedEntities->setResults($paginated->getItems());
-        $fetchPaginatedEntities->setTotal($paginated->getTotalItemCount());
     }
 }

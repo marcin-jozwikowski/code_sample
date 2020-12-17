@@ -2,19 +2,21 @@
 
 namespace App\Controller;
 
-use App\Message\FetchEntityMessage;
-use App\Message\FetchPaginatedEntitiesInterface;
-use App\Message\FetchPaginatedEntitiesMessage;
+use App\Message\FetchEntityQuery;
+use App\Message\FetchPaginatedEntitiesQueryInterface;
+use App\Message\FetchPaginatedEntitiesQuery;
 use App\Message\PersistEntityMessage;
 use App\Message\RemoveEntityMessage;
 use App\Service\ApiSerializerInterface;
 use App\Service\ApiValidatorInterface;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -31,13 +33,23 @@ abstract class AbstractApiController extends AbstractController
 
     public function indexAction(Request $request): JsonResponse
     {
-        $fetchPaginated = new FetchPaginatedEntitiesMessage(
+        $fetchPaginated = new FetchPaginatedEntitiesQuery(
             (int)$request->query->get('page', '1'),
             (int)$request->query->get('perPage', '3'),
             $this->getApiEntityClassName(),
         );
-        $this->messageBus->dispatch($fetchPaginated);
-        $result = $this->paginatedResult($fetchPaginated, $fetchPaginated->getResults());
+
+        $fetchPaginatedResponse = $this->messageBus->dispatch($fetchPaginated)->last(HandledStamp::class);
+        if ($fetchPaginatedResponse === null) {
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+        if (!$fetchPaginatedResponse->getResult() instanceof PaginationInterface) {
+            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        }
+        /** @var PaginationInterface $paginated */
+        $paginated = $fetchPaginatedResponse->getResult();
+
+        $result = $this->paginateResult($paginated, $paginated->getItems());
         return new JsonResponse($result, Response::HTTP_OK, [], true);
     }
 
@@ -128,26 +140,28 @@ abstract class AbstractApiController extends AbstractController
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
-    protected function paginatedResult(FetchPaginatedEntitiesInterface $fetchPaginated, iterable $items, $groups = ['index']): string
+
+    protected function paginateResult(PaginationInterface $result, iterable $items, $groups = ['index']): string
     {
         return $this->serializer->toJson([
-            'total'   => $fetchPaginated->getTotal(),
-            'page'    => $fetchPaginated->getPage(),
-            'perPage' => $fetchPaginated->getPerPage(),
+            'total'   => $result->getTotalItemCount(),
+            'page'    => $result->getCurrentPageNumber(),
+            'perPage' => $result->getItemNumberPerPage(),
             'items'   => $items
         ], $groups);
     }
 
     protected function getEntity(int $id): object
     {
-        $message = new FetchEntityMessage($id, $this->getApiEntityClassName());
-        $this->messageBus->dispatch($message);
+        $message = new FetchEntityQuery($id, $this->getApiEntityClassName());
+        /** @var HandledStamp $handled */
+        $handled = $this->messageBus->dispatch($message)->last(HandledStamp::class);
 
-        if ($message->getEntity() === null) {
+        if ($handled->getResult() === null) {
             throw new NotFoundHttpException($message->getClassname());
         }
 
-        return $message->getEntity();
+        return $handled->getResult();
     }
 
     protected function fillEntityWithRequestData(object $entity, Request $request, ApiValidatorInterface $apiValidator): ?JsonResponse
