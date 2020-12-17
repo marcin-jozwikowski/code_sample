@@ -17,7 +17,7 @@ class FetchEntityQueryHandler implements MessageHandlerInterface
         $this->entityManager = $entityManager;
     }
 
-    public function __invoke(FetchEntityQueryInterface $fetchEntityMessage): object
+    public function __invoke(FetchEntityQueryInterface $fetchEntityMessage): ?object
     {
         $repository = $this->entityManager->getRepository($fetchEntityMessage->getClassname());
         return $repository->find($fetchEntityMessage->getId());
