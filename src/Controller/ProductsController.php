@@ -24,6 +24,7 @@ class ProductsController extends AbstractApiController
     /**
      * @Route(path="/", name="products_index", methods={"GET"})
      *
+     * @OA\Tag(name="Product")
      * @OA\Get(
      *     @OA\Parameter(name="page", required=false, description="Page number", in="query",
      *          @OA\Schema(type="integer", default="1"),
@@ -49,6 +50,7 @@ class ProductsController extends AbstractApiController
     /**
      * @Route(path="/{id}", name="product_get", methods={"GET"}, requirements={"id"="\d+"})
      *
+     * @OA\Tag(name="Product")
      * @OA\Get(
      *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
      *          @OA\Schema(type="integer"),
@@ -71,6 +73,7 @@ class ProductsController extends AbstractApiController
 
     /**
      * @Route(path="/", name="product_post", methods={"POST"})
+     * @OA\Tag(name="Product")
      * @OA\Post()
      * @OA\RequestBody(
      *     @OA\JsonContent(ref=@Nelmio\Model(type=Product::class, groups={"post"}))
@@ -97,6 +100,7 @@ class ProductsController extends AbstractApiController
 
     /**
      * @Route(path="/{id}", name="product_patch", methods={"PATCH"}, requirements={"id"="\d+"})
+     * @OA\Tag(name="Product")
      * @OA\Patch (
      *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
      *          @OA\Schema(type="integer"),
@@ -128,6 +132,7 @@ class ProductsController extends AbstractApiController
 
     /**
      * @Route(path="/{id}", name="product_put", methods={"PUT"}, requirements={"id"="\d+"})
+     * @OA\Tag(name="Product")
      * @OA\Put (
      *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
      *          @OA\Schema(type="integer"),
@@ -159,6 +164,7 @@ class ProductsController extends AbstractApiController
 
     /**
      * @Route(path="/{id}", name="product_delete", methods={"DELETE"}, requirements={"id"="\d+"})
+     * @OA\Tag(name="Product")
      * @OA\Delete (
      *     @OA\Parameter(name="id", required=true, description="Product ID", in="path",
      *          @OA\Schema(type="integer"),
