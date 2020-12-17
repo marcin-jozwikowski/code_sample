@@ -5,7 +5,6 @@ namespace App\Controller;
 
 
 use App\Entity\Product;
-use App\Service\ApiValidatorInterface;
 use Nelmio\ApiDocBundle\Annotation as Nelmio;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -91,9 +90,9 @@ class ProductsController extends AbstractApiController
      *     )
      * ),
      */
-    public function postAction(Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    public function postAction(Request $request): JsonResponse
     {
-        return parent::postAction($request, $apiValidator);
+        return parent::postAction($request);
     }
 
     /**
@@ -122,9 +121,9 @@ class ProductsController extends AbstractApiController
      *     )
      * ),
      */
-    public function patchAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    public function patchAction(int $id, Request $request): JsonResponse
     {
-        return parent::patchAction($id, $request, $apiValidator);
+        return parent::patchAction($id, $request);
     }
 
     /**
@@ -153,9 +152,9 @@ class ProductsController extends AbstractApiController
      *     )
      * ),
      */
-    public function putAction(int $id, Request $request, ApiValidatorInterface $apiValidator): JsonResponse
+    public function putAction(int $id, Request $request): JsonResponse
     {
-        return parent::putAction($id, $request, $apiValidator);
+        return parent::putAction($id, $request);
     }
 
     /**
