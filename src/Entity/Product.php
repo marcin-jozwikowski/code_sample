@@ -25,7 +25,7 @@ class Product
      *
      * @Assert\Length(min="3", max="64")
      * @Assert\NotBlank()
-     * @Groups({"all", "index", "get", "update"})
+     * @Groups({"all", "index", "get", "update", "post"})
      */
     private ?string $name;
 
@@ -34,7 +34,7 @@ class Product
      *
      * @Assert\GreaterThan(0)
      * @Assert\NotBlank()
-     * @Groups({"all", "get", "update"})
+     * @Groups({"all", "get", "update", "post"})
      */
     private ?int $quantity;
 
