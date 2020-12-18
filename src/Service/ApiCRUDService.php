@@ -76,27 +76,13 @@ class ApiCRUDService implements ApiCRUDServiceInterface
 
     public function update(string $className, int $id, string $getContent): JsonResponse
     {
-        try {
-            $entity = $this->getEntity($className, $id);
-        } catch (NotFoundHttpException $exception) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-        }
-
         $empty            = new $className();
         $emptyObjectError = $this->fillEntityWithRequestData($empty, $getContent);
         if ($emptyObjectError instanceof JsonResponse) {
             return $emptyObjectError;
         }
 
-        $errorResponse = $this->fillEntityWithRequestData($entity, $getContent);
-        if ($errorResponse instanceof JsonResponse) {
-            return $errorResponse;
-        }
-
-        $event = new PersistEntityMessage($entity);
-        $this->messageBus->dispatch($event);
-
-        return new JsonResponse($this->serializer->toJson($entity, ['update']), Response::HTTP_OK, [], true);
+        return $this->updatePartial($className, $id, $getContent);
     }
 
     public function updatePartial(string $className, int $id, string $requestContent): JsonResponse
