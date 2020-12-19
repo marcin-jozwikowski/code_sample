@@ -1,0 +1,15 @@
+actor: ApiTester
+path: ./api/
+modules:
+  enabled:
+    - REST:
+        url: /api/v1/
+        depends: Symfony
+    - Doctrine2:
+        depends: Symfony
+        cleanup: true
+    - Symfony:
+        app_path: 'src'
+        environment: 'test'
+    - \App\Tests\Helper\Api
+bootstrap: _bootstrap.php
