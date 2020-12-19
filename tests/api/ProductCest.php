@@ -64,6 +64,24 @@ class ProductCest
         $I->seeNumRecords(2, Product::class);
     }
 
+    public function testPostValidationFailed(ApiTester $I): void
+    {
+        $I->sendPost('/product/', [
+            'name' => '',
+        ]);
+        $I->seeResponseCodeIs(HttpCode::EXPECTATION_FAILED);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'name'     => [
+                "This value is too short. It should have 3 characters or more.",
+                "This value should not be blank."
+            ],
+            'quantity' => [
+                "This value should not be blank."
+            ]
+        ]);
+    }
+
     public function testIndexAfterPost(ApiTester $I): void
     {
         $this->testPost($I, 3);
@@ -91,7 +109,7 @@ class ProductCest
     public function testGetSingle(ApiTester $I): void
     {
         /** @var Product $product */
-        $product = $I->grabEntityFromRepository(Product::class);
+        $product = $I->grabEntityFromRepository(Product::class, ['id' => 1]);
 
         assertEquals(1, $product->getId());
         assertEquals('First', $product->getName());
@@ -105,6 +123,14 @@ class ProductCest
             'name'     => $product->getName(),
             'quantity' => $product->getQuantity()
         ]);
+    }
+
+    public function testGetSingleNotExistent(ApiTester $I): void
+    {
+        $I->sendGet('/product/0');
+        $I->seeResponseCodeIs(HttpCode::NOT_FOUND);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([]);
     }
 
     public function testPut(ApiTester $I): void
@@ -128,6 +154,35 @@ class ProductCest
         assertEquals(12, $updated->getQuantity());
     }
 
+    public function testPutNotExistent(ApiTester $I): void
+    {
+        $I->sendPut('/product/0', [
+            'name' => 'testName',
+            'quantity' => 12
+        ]);
+        $I->seeResponseCodeIs(HttpCode::NOT_FOUND);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([]);
+    }
+
+    public function testPutInvalidData(ApiTester $I): void
+    {
+        $I->sendPut('/product/1', [
+            'name' => '',
+        ]);
+        $I->seeResponseCodeIs(HttpCode::EXPECTATION_FAILED);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'name'     => [
+                "This value is too short. It should have 3 characters or more.",
+                "This value should not be blank."
+            ],
+            'quantity' => [
+                "This value should not be blank."
+            ]
+        ]);
+    }
+
     public function testPatch(ApiTester $I): void
     {
         $I->sendPatch('/product/1', [
@@ -148,6 +203,31 @@ class ProductCest
         assertEquals(12, $updated->getQuantity());
     }
 
+    public function testPatchNotExistent(ApiTester $I): void
+    {
+        $I->sendPatch('/product/0', [
+            'quantity' => 12
+        ]);
+        $I->seeResponseCodeIs(HttpCode::NOT_FOUND);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([]);
+    }
+
+    public function testPatchInvalidData(ApiTester $I): void
+    {
+        $I->sendPatch('/product/1', [
+            'name' => ''
+        ]);
+        $I->seeResponseCodeIs(HttpCode::EXPECTATION_FAILED);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([
+            'name'     => [
+                "This value is too short. It should have 3 characters or more.",
+                "This value should not be blank."
+            ],
+        ]);
+    }
+
     public function testDelete(ApiTester $I): void
     {
         $I->sendDelete('/product/1');
@@ -155,5 +235,13 @@ class ProductCest
         $I->seeResponseIsJson();
 
         $I->dontSeeInRepository(Product::class, ['id' => 1]);
+    }
+
+    public function testDeleteNotExistent(ApiTester $I): void
+    {
+        $I->sendDelete('/product/0');
+        $I->seeResponseCodeIs(HttpCode::NOT_FOUND);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson([]);
     }
 }
